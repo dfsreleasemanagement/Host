@@ -1,0 +1,227 @@
+<html>
+	<head>
+		<title>Create Mailto URLs</title>
+		<script type="text/javascript">
+			// CREATE A MAILTO URL OR MAILTO ANCHOR TAG
+			function createMailto(sourceForm, targetField, urlType) {
+				var to = sourceForm.to.value;
+				var cc = sourceForm.cc.value;
+				var bcc = sourceForm.bcc.value;
+				var subject = sourceForm.subject.value;
+				var body = sourceForm.body.value;
+				var linkText = sourceForm.linkText.value;
+				var toolTip = sourceForm.toolTip.value;
+				var winStatus = sourceForm.winStatus.value;
+				if (linkText == "") {
+					linkText = "Link Text";
+				}
+				var urltext = "";
+				// IF THE VALUE IS SET, INCLUDE IT IN THE URL
+				if (to != "") {
+					urltext += to;
+				}
+				else {
+					alert("Cannot generate URL\n\nA value for the 'To' field (at least) must be specified\nbefore a URL can be created.");
+					sourceForm.to.focus();
+					return(1);
+				}
+				if (cc != "") {
+					urltext = addDelimiter(urltext);
+					urltext += "CC=" + cc;
+				}
+				if (bcc != "") {
+					urltext = addDelimiter(urltext);
+					urltext += "BCC=" + bcc;
+				}
+				if (subject != "") {
+					urltext = addDelimiter(urltext);
+					urltext += "Subject=" + escape(subject);
+				}
+				if (body != "") {
+					urltext = addDelimiter(urltext);
+					urltext += "Body=" + escape(body);
+				}
+				if (winStatus != "") {
+					if (toolTip == "") {
+						urltext += "\" title='' onMouseOver=\"window.status='" + winStatus + "';return true\" onMouseOut=\"window.status=''";
+					}
+				}
+				if (winStatus == "") {
+					if (toolTip != "") {
+						urltext += "\" title=\"" + toolTip + "\" onMouseOver=\"window.status='';return true\" onMouseOut=\"window.status=''";
+					}
+				}
+				if (winStatus != "") {
+					if (toolTip != "") {
+						urltext += "\" title=\"" + toolTip + "\" onMouseOver=\"window.status='" + winStatus + "';return true\" onMouseOut=\"window.status=''";
+					}
+				}
+				if (urlType == "url") {
+					// IF STATUS BAR TEXT HAS BEEN SPECIFIED, DON'T INCLUDE "<a>" TAG ATTRIBUTES
+					if (winStatus != "") {
+						var stripAnchor = urltext;
+							urltext = "mailto:" + stripAnchor.substring(stripAnchor.indexOf("mailto:"), stripAnchor.indexOf("title=")-2);
+					}
+					else {
+						urltext = "mailto:" + urltext;
+					}
+				}
+				else {
+					urltext = "<a target=\"_blank\" href=\"mailto:" + urltext + "\">" + linkText + "</a>";
+				}
+				// PUT THE NEW URL IN THE FORM FIELD
+				targetField.value = urltext;
+				// GIVE THE FIELD FOCUS AND HIGHLIGHT THE TEXT -- TO FACILITATE EASY COPYING AND PASTING OF THE NEW URL
+				targetField.focus();
+				targetField.select();
+				return(1);
+			}
+
+			// ADD THE "?" OR "&" NAME/VALUE SEPARATOR CHARACTER
+			function addDelimiter(inputString) {
+				var inString = inputString;
+				// IF '?' NOT FOUND, THEN THIS IS THE FIRST NAME/VALUE PAIR
+				if (inString.indexOf("?") == -1) {
+					inString += "?";
+				}
+				// ELSE IT'S A SUBSEQUENT NAME/VALUE PAIR, SO ADD THE '&' CHARACTER
+				else {
+					inString += "&";
+				}
+				return inString;
+			}
+
+			// TEST THE MAILTO URL -- ASSIGN THE URL TO THE DOCUMENT LOCATION TO POP UP THE MESSAGE WINDOW
+			function testMailto(loc) {
+				var doc = loc;
+				// IF MAILTO URL IS EMBEDDED IN AN ANCHOR TAG
+				if (doc.indexOf("href=") != -1) {
+					// EXTRACT THE MAILTO URL FROM THE ANCHOR TAG
+					// IF NO STATUS BAR TEXT HAS BEEN SPECIFIED (THE WORD 'status' ISN'T FOUND IN THE STRING), GRAB EVERYTHING BETWEEN "href=" AND ">"
+					if (doc.substring(doc.indexOf(">")-10, doc.indexOf(">")-4) != "status") {
+						var doc = doc.substring(doc.indexOf("href=")+6, doc.indexOf(">")-1);
+					}
+					// ELSE STATUS BAR TEXT HAS BEEN SPECIFIED, SO GET EVERYTHING BETWEEN "href=" AND " title"
+					else {
+						var doc = doc.substring(doc.indexOf("href=")+6, doc.indexOf("title")-2);
+					}
+				}
+				// ASSIGN THE MAILTO URL TO THE DOCUMENT (THIS WILL POP UP A MAIL WINDOW)
+				window.location = doc;
+			}
+
+			function viewMailto(mailtoText) {
+				alert("URL:\n\n" + mailtoText);
+			}
+		</script>
+		<style>
+			body, td {
+				font-family: Verdana, Arial, Helvetica, sans-serif;
+				font-size: 10pt;
+				font-weight: bold;
+				text-align: left;
+				vertical-align: top;
+				white-space: nowrap;
+			}
+			input, textarea {
+				background-color: #F0F0F0;
+				border: 1px solid #787878;
+				font-family: Verdana, Arial, Helvetica, sans-serif;
+				font-size: 10pt;
+				font-weight: normal;
+				padding: 0.1em 0.2em;
+			}
+			input[type=text], textarea {
+				width: 500px;
+			}
+			textarea {
+				resize: none;
+			}
+		</style>
+	</head>
+	<body>
+		<form name="mailtoForm">
+			<table border=0 align="center" cellpadding=2 cellspacing=0 bgcolor="#ffffff">
+				<tr>
+					<td height="60"></td>
+					<td height="60" style="color: #008080;font-size: 1.2em;text-align: center;">Create a mailto: URL</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td height="40" style="text-align: center;">Enter Message Details Here</td>
+				</tr>
+				<tr>
+					<td>To:</td>
+					<td><input type="text" name="to" size=30></td>
+				</tr>
+				<tr>
+					<td>Cc:</td>
+					<td>
+						<input type="text" name="cc" size=30></td>
+				</tr>
+				<tr>
+					<td>Bcc:</td>
+					<td><input type="text" name="bcc" size=30></td>
+				</tr>
+				<tr>
+					<td>Subject:</td>
+					<td><input type="text" name="subject" size=66></td>
+				</tr>
+				<tr>
+					<td>Body:</td>
+					<td><textarea name="body" cols=66 rows=6 wrap="virtual"></textarea></td>
+				</tr>
+				<tr>
+					<td>Link Text:</td>
+					<td><input type="text" name="linkText" size=66></td>
+				</tr>
+				<tr>
+					<td>Tooltip Text:</td>
+					<td><input type="text" name="toolTip" size=66></td>
+				</tr>
+				<tr>
+					<td>Status Bar Text:&nbsp;</td>
+					<td><input type="text" name="winStatus" size=66><br><br></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td style="font-size: 8pt;font-weight: normal;"><span style="font-weight: bold;color: #FF0000;">Note:</span> If single or double quotes are used in the Status Bar Text, &quot;escape&quot; them using a backslash.<br>Failure to do so will prevent text from appearing in the status bar.<br><br>
+								<span style="font-weight: bold;">Examples:</span><br><br>
+								&nbsp;&nbsp;&nbsp;you<span style="color: #FF0000;">\</span>'ll&nbsp;&nbsp;I<span style="color: #FF0000;">\</span>'ve&nbsp;&nbsp;<span style="color: #FF0000;">\</span>"howdy<span style="color: #FF0000;">\</span>"&nbsp;&nbsp;we<span style="color: #FF0000;">\</span>'d&nbsp;&nbsp;etc.</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td style="text-align: center;">
+						<input type="reset" name="Clear" value="Clear Form">
+						<input type="button" name="CreateURL" value="Create URL" onClick="createMailto(document.mailtoForm, document.mailtoForm.text, 'url')">
+						<input type="button" name="CreateAnchor" value="Create URL with <a> Tag" onClick="createMailto(document.mailtoForm, document.mailtoForm.text, 'anchor')">
+					</td>
+				</tr>
+				<tr>
+					<td height="40"></td>
+					<td height="40" style="color: #008080;font-size: 1em;text-align: center;vertical-align: middle;">Here is your mailto: URL</td>
+				</tr>
+				<tr>
+					<td><b>mailto URL:</b></td>
+					<td><input name="text" type="text" size=66 readonly="true"></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td style="text-align: center">
+						<input type="button" name="Test" value="Test URL" onClick="testMailto(document.mailtoForm.text.value)">
+						<input type="button" name="View" value="View URL" onClick="viewMailto(document.mailtoForm.text.value)">
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>
